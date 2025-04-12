@@ -9,7 +9,7 @@ import { PrismaUserRepository } from './infrastructure/database/prisma-user.repo
     providers: [
         RegisterUserUseCase,
         {
-          provide: 'IUserRepository', // Vincula la interfaz a la implementación
+          provide: 'IUserRepository', 
           useClass: PrismaUserRepository,
         },
       ],
