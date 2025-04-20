@@ -32,7 +32,7 @@ export class StripeController {
     try {
       event = this.stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
     } catch (err) {
-      console.error('❌ Error verificando firma del webhook:', err.message);
+      
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
@@ -42,12 +42,10 @@ export class StripeController {
       try {
         const session = event.data.object as Stripe.Checkout.Session;
 
-        // Validar y procesar los datos del webhook
+
         if (!session.metadata) {
           throw new Error('Metadata no está presente en la sesión');
         }
-
-        console.log('✅ Sesión completada:', session);
 
         // Validar campos en metadata
         const userId = parseInt(session.metadata.userId);
@@ -61,7 +59,7 @@ export class StripeController {
 
         let items;
         try {
-          items = JSON.parse(session.metadata.products); // Cambia "items" por "products"
+          items = JSON.parse(session.metadata.products); 
         } catch (err) {
           throw new Error('Error al parsear products en metadata: ' + err.message);
         }
@@ -70,10 +68,10 @@ export class StripeController {
           throw new Error('Datos inválidos en metadata');
         }
 
-        // Ejecutar el caso de uso con los datos validados
+
         await this.webhookUseCase.execute({
           userId,
-          addressId: 2, // Usar un addressId estático
+          addressId: 2, 
           subtotal,
           iva,
           total,
@@ -82,7 +80,6 @@ export class StripeController {
 
         console.log('✅ Pedido creado exitosamente');
       } catch (error) {
-        console.error('❌ Error en webhookUseCase:', error);
         return res.status(500).send('Internal error');
       }
     }
