@@ -56,12 +56,12 @@ export class CreateStripeSessionUseCase {
 
       const ivaPercentage = ivaConfig.percentage; 
 
-      // 4. Calcular totales usando el IVA de la base de datos
-      const subtotal = cart.reduce((acc, item) => acc + item.total, 0);
-      const iva = +(subtotal * ivaPercentage).toFixed(2);
-      const total = +(subtotal + iva).toFixed(2);
+      
+      const subtotal = cart.reduce((acc, item) => acc + item.total, 0); // Suma de los totales de los productos
+      const iva = +(subtotal * ivaPercentage).toFixed(2); // IVA como porcentaje
+      const total = +(subtotal + iva).toFixed(2); // Total = Subtotal + IVA
 
-      // 5. Crear sesión de Stripe
+
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         mode: 'payment',
