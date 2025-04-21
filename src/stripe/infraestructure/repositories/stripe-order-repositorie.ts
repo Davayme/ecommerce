@@ -36,7 +36,7 @@ export class OrderRepository implements IOrderRepository {
         where: { id: item.productId },
         data: {
           stock: {
-            decrement: item.quantity, // Disminuir el stock
+            decrement: item.quantity, 
           },
         },
       });

@@ -1,9 +1,8 @@
-// modules/stripe/application/use-cases/create-session.use-case.ts
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { StripeService } from 'src/stripe/application/stripe/stripe.service';
-import { CreateStripeSessionDto } from '../dto/create-stripe-session.dto';
-import { ConfigService } from '@nestjs/config';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { CreateStripeSessionDto } from "../dto/create-stripe-session.dto";
+import { StripeService } from "src/stripe/application/stripe/stripe.service";
+import { ConfigService } from "@nestjs/config";
+import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
 export class CreateStripeSessionUseCase {
@@ -11,7 +10,7 @@ export class CreateStripeSessionUseCase {
     private readonly stripeService: StripeService,
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
-  ) { }
+  ) {}
 
   async execute(dto: CreateStripeSessionDto, userId: number) {
     try {
@@ -46,12 +45,23 @@ export class CreateStripeSessionUseCase {
         };
       });
 
-      // 3. Calcular totales
+      // 3. Obtener el porcentaje de IVA desde la base de datos
+      const ivaConfig = await this.prisma.iVAConfig.findUnique({
+        where: { id: 1 }, 
+      });
+
+      if (!ivaConfig) {
+        throw new NotFoundException('Configuración de IVA no encontrada.');
+      }
+
+      const ivaPercentage = ivaConfig.percentage; 
+
+      // 4. Calcular totales usando el IVA de la base de datos
       const subtotal = cart.reduce((acc, item) => acc + item.total, 0);
-      const iva = +(subtotal * 0.12).toFixed(2);
+      const iva = +(subtotal * ivaPercentage).toFixed(2);
       const total = +(subtotal + iva).toFixed(2);
 
-      // 4. Crear sesión de Stripe
+      // 5. Crear sesión de Stripe
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         mode: 'payment',
@@ -70,7 +80,7 @@ export class CreateStripeSessionUseCase {
           subtotal: subtotal.toFixed(2),
           iva: iva.toFixed(2),
           total: total.toFixed(2),
-          addressId: 1, // Cambiar por el ID real de la dirección del usuario
+          addressId: 1, // Obtener el ID de la dirección del usuario
           products: JSON.stringify(cart.map(({ productId, quantity, price }) => ({
             productId,
             quantity,
