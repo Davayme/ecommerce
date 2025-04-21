@@ -31,7 +31,16 @@ export class OrderRepository implements IOrderRepository {
       include: { items: true },
     });
 
-
+    for (const item of dto.items) {
+      await this.prisma.product.update({
+        where: { id: item.productId },
+        data: {
+          stock: {
+            decrement: item.quantity, // Disminuir el stock
+          },
+        },
+      });
+    }
     return order;
   }
 }

@@ -10,11 +10,9 @@ export class WebhookUseCase {
 
   async execute(dto: CreateOrderFromStripeDTO) {
     try {
-      console.log('Datos recibidos para crear el pedido:', dto);
+
 
       const order = await this.orderRepository.createOrder(dto);
-
-      console.log('Pedido creado exitosamente:', order);
       return order;
     } catch (error) {
       console.error('❌ Error al procesar el pedido:', error);

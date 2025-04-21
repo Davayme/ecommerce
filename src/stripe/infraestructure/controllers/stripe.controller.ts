@@ -36,8 +36,6 @@ export class StripeController {
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    console.log(`✅ Evento recibido: ${event.type}`);
-
     if (event.type === 'checkout.session.completed') {
       try {
         const session = event.data.object as Stripe.Checkout.Session;
